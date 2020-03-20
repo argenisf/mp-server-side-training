@@ -1,0 +1,482 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>MPTasks</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <script src="js/jquery.js"></script>
+  <script src="js/popper.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/font-awesome-a4d98c0ed1.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/site.css">
+  <script type="text/javascript">
+    var mp_token = '{{mp_token}}';
+    var user_obj = {{user_obj}};
+
+    (function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,0)))}}
+    var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
+    for(h=0;h<l.length;h++)c(e,l[h]);var f="set set_once union unset remove delete".split(" ");e.get_group=function(){function a(c){b[c]=function(){call2_args=arguments;call2=[c].concat(Array.prototype.slice.call(call2_args,0));e.push([d,call2])}}for(var b={},d=["get_group"].concat(Array.prototype.slice.call(arguments,0)),c=0;c<f.length;c++)a(f[c]);return b};a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
+    mixpanel.init(mp_token);
+  </script>
+</head>
+<body>
+  <div class="container"  aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+
+   
+    
+    <div  id="header" class="row justify-content-md-center align-items-end">
+      <div class="col col-lg-5">
+        <h3></h3>
+        <div class="btn-position">
+          <a href="authenticate.php?logout=true" class="btn btn-secondary" role="button" aria-disabled="true">Log Out</a>
+        </div>
+      </div>
+    </div> <!-- row div: header -->
+
+    <div  id="pending" class="row justify-content-md-center">
+      <div class="col col-lg-6">
+
+        <div class="form-group mainAddDiv">
+          <form id="newTaskForm">
+            <input required="required" disabled="disabled" type="text" class="form-control" id="inputAddTask" placeholder="loading...">
+            <button type="button" class="btn btn-primary"><i class="fas fa-plus-circle"></i></button>
+          </form>
+          <div id="loader" class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+
+        <div class="taskList pending">
+          <h3>Pending Tasks</h3>
+        </div>
+
+        <div class="taskList done">
+          <h3>Completed Tasks</h3>
+        </div>
+
+      </div><!-- col -->
+    </div> <!-- row div: pending -->
+
+    <div id="toastHolder" style="position: absolute; top: 0; right: 0;"></div>
+
+
+  </div><!--  container  div -->
+  <script type="text/javascript"> 
+  (function() {
+    // redirect in case no user has been loaded
+    if(typeof user_obj  == 'undefined' || !user_obj || !user_obj.id){ location.href = 'authenticate.php?logout=true'; }
+
+    //variables
+    var toasts_holder = $('#toastHolder');
+    var loader_div = $('#loader');
+    var input_add_task = $('#inputAddTask');
+    var pending_tasks = [];
+    var completed_tasks = [];
+    var toasts =  [];
+    var toast_ids = 0;
+    var pending_updates = [];
+    var new_task_form = $('#newTaskForm');
+    var new_task_btn = $('#newTaskForm button');
+    var new_task_input = $('#inputAddTask');
+
+    var task_list_pending_div = $('.taskList.pending');
+    var task_list_completed_div = $('.taskList.done');
+
+    var endpoints = {
+      "get": "api/get_tasks.php?",
+      "new": "api/create_task.php?",
+      "update": "api/update_task.php?",
+      "delete": "api/delete_task.php?"
+    };
+
+    /* * * * * * * * * * * * * * * * * *
+    ------------------------------------
+    Setup and Loading Section
+    ------------------------------------
+    * * * * * * * * * * * * * * * * * */
+
+    //set email on header
+    $('#header h3').html(user_obj.email);
+
+    function app_loaded(){
+      loader_div.hide();
+      input_add_task[0].placeholder = "Type a new task";
+      input_add_task[0].disabled = false;
+
+      //add listener for new tasks
+      new_task_form.submit(function(action){
+        action.preventDefault();
+        new_task_submission();
+      });
+
+      new_task_btn.on("click",function(){
+        new_task_submission();
+      });
+    }// end of app_loaded function
+
+    function load_tasks(){
+      $.get(endpoints.get+'user_id='+user_obj.id, function(data){
+        try{
+          if(!data.status){
+            unable_to_load_app();  
+          }else{
+            for(var i=0; i < data.tasks.length; i++){
+              if(data.tasks[i].completed){
+                completed_tasks.push(data.tasks[i]);
+              }else{
+                pending_tasks.push(data.tasks[i]);
+              }
+            }
+
+            render_tasks();
+          }
+        }catch(e){
+          console.log(e);
+          unable_to_load_app();
+        }
+      }).fail(function(){
+        unable_to_load_app();
+      })
+    }//end of load_tasks function
+
+    function unable_to_load_app(){
+      show_toast_message('Error loading tasks');
+      app_loaded();
+    }// end of unable_to_load_app function
+
+
+    /* * * * * * * * * * * * * * * * * *
+    ------------------------------------
+    Task Manipulation Section
+    ------------------------------------
+    * * * * * * * * * * * * * * * * * */
+
+    function render_tasks(){
+      //add pending tasks
+      for(var i = 0; i <  pending_tasks.length; i ++){
+        add_task_to_ui(pending_tasks[i]);
+      }
+      // add completed tasks
+      for(i = 0; i <  completed_tasks.length; i ++){
+        add_task_to_ui(completed_tasks[i]);
+      }
+
+      //add event listeners
+      $('.taskList.pending').on( "click", ".listItem .actionBtn button", function() {
+        change_task_state($(this).data('taskid'), true);
+      });
+      $('.taskList.done').on( "click", ".listItem .actionBtn button", function() {
+        change_task_state($(this).data('taskid'), false);
+      });
+
+      $('.taskList.pending').on( "click", ".listItem .deleteBtn button", function() {
+        delete_task($(this).data('taskid'), false);
+      });
+      $('.taskList.done').on( "click", ".listItem .deleteBtn button", function() {
+        delete_task($(this).data('taskid'), true);
+      });
+
+      //set the app to active
+      app_loaded();
+    }// end of render_tasks function 
+
+    function add_task_to_ui(task){
+      var html = '<div id="taskItem'+task.id+'" class="listItem"><div class="actionBtn">';
+      
+      //add button depending on whether it is completed or not
+      if(!task.completed){
+        html+= '<button data-taskid="'+task.id+'" type="button" class="btn btn-info"><i class="fas fa-circle"></i></button></div>';
+      }else{
+        html+= '<button data-taskid="'+task.id+'" type="button" class="btn btn-success"><i class="fas fa-check-circle"></i></button></div>';
+      }
+
+      html+= '<p>'+task.text+'</p>';
+      html+= '<div class="deleteBtn"><button data-taskid="'+task.id+'" type="button" class="btn btn-danger"><i class="fas fa-trash"></i></button></div><div class="status">';
+
+      //add proper label on whether it is completed or pending
+      if(task.completed){
+        html+= '<span class="badge badge-pill badge-secondary">completed</span>';
+      }else{
+        html+= '<span class="badge badge-pill badge-warning">pending</span>';
+      }
+      html+= '</div></div>';
+
+      //add to the proper div
+      if(task.completed){
+        task_list_completed_div.append(html);
+      }else{
+        task_list_pending_div.append(html);
+      }
+    }// end of add_task_to_ui function
+
+    function new_task_submission(){
+      if(new_task_input.val() != ""){
+        var text = new_task_input.val();
+        new_task_input[0].disabled = true;
+        show_loader();
+
+        var payload = {
+          id: 0,
+          user_id: user_obj.id,
+          text: text,
+          completed: false
+        };
+
+        $.post(endpoints.new,payload, function(data){
+          try{
+            if(!data.status){
+              show_toast_message('Unable to create task');
+              hide_loader();
+              new_task_input[0].disabled = false;
+              new_task_input.focus();
+            }else{
+              new_task_input.val('');
+              new_task_input[0].disabled = false;
+              new_task_input.focus();
+              pending_tasks.push(data.task);
+              add_task_to_ui(data.task);
+              hide_loader();
+              if(data.message){
+                show_toast_message(data.message, true);
+              }else{
+                show_toast_message("Task successfully created", true);
+              }
+            }
+          }catch(e){
+            console.log(e);
+            show_toast_message('Unable to create task');
+            hide_loader();
+            new_task_input[0].disabled = false;
+            new_task_input.focus();
+          }
+        }).fail(function(e){
+          console.log(e);
+          show_toast_message('Unable to create task');
+          hide_loader();
+          new_task_input[0].disabled = false;
+          new_task_input.focus();
+        })
+      }
+    }// end of function new_task_submission
+
+
+    function change_task_state(task_id, completed){
+      var task_div = $('#taskItem'+task_id);
+      
+      if(task_div.length == 0){
+        show_toast_message('Unable to update task');
+        return false;
+      }
+
+      //hide task while we process
+      task_div.hide();
+      show_loader();
+
+      pending_updates.push({id: task_id, completed: completed});
+      var task = false;
+      var look_up_array = [];
+      //lookup task
+      if(completed){
+        look_up_array = pending_tasks;
+      }else{
+        look_up_array = completed_tasks;
+      }
+
+      for(var i=0; i < look_up_array.length; i++){
+        if(look_up_array[i].id == task_id){
+          task = look_up_array[i];
+        }
+      }
+
+      var payload = {
+        user_id: user_obj.id,
+        task_id: task_id,
+        completed: completed,
+        text: task.text
+      };
+      $.post(endpoints.update,payload, function(data){
+        //update response received
+        try{
+          if(!data.status){
+            show_toast_message('Failed to update task');
+            remove_item_from_pending(task_id);
+            task_div.show();
+            hide_loader();
+          }else{
+            //task successfully updated
+            if(data.message && data.message != ""){
+              show_toast_message(data.message,true);
+            }else{
+              show_toast_message("Task successfully updated", true);
+            }
+            remove_item_from_pending(task_id);
+            remove_task(task_id, !data.task.new_state);
+            add_task(data.task);
+          }
+        }catch(e){
+          console.log(e);
+          show_toast_message('Failed to update task');
+          remove_item_from_pending(task_id);
+          task_div.show();
+          hide_loader();
+        }
+      }).fail(function(){
+        //update failed
+        show_toast_message('Failed to update task');
+        remove_item_from_pending(task_id);
+        task_div.show();
+        hide_loader();
+      });
+    }// end of function
+
+    function  delete_task(task_id, completed){
+      var task_div = $('#taskItem'+task_id);
+      
+      if(task_div.length == 0){
+        show_toast_message('Unable to update task');
+        return false;
+      }
+
+      //hide task while we process
+      task_div.hide();
+      show_loader();
+
+      pending_updates.push({id: task_id, completed: completed});
+      var payload = {
+        user_id: user_obj.id,
+        task_id: task_id
+      };
+      $.post(endpoints.delete,payload, function(data){
+        //delete response received
+        try{
+          if(!data.status){
+            show_toast_message('Failed to update task');
+            remove_item_from_pending(task_id);
+            task_div.show();
+            hide_loader();
+          }else{
+            remove_item_from_pending(task_id);
+            //task successfully updated
+            if(data.message && data.message != ""){
+              show_toast_message(data.message, true);
+            }else{
+              show_toast_message("Task deleted", true);
+            }
+            remove_task(task_id, completed);
+            hide_loader();
+          }
+        }catch(e){
+          show_toast_message('Failed to update task');
+          remove_item_from_pending(task_id);
+          task_div.show();
+          hide_loader();
+        }
+      }).fail(function(e){
+        show_toast_message('Failed to update task');
+        remove_item_from_pending(task_id);
+        task_div.show();
+        hide_loader();
+      });
+    } // end of function delete_task
+
+    function remove_task(id, previous_state){
+
+      var previus_div = $('#taskItem'+id);
+      if(previus_div.length > 0){
+        previus_div.remove();
+      }
+
+      var index = -1;
+      if(previous_state){
+        for(var i=0; i<completed_tasks.length; i++){
+          if(completed_tasks[i].id == id){
+            index = i;
+          }
+        }
+        if(index > -1){
+          completed_tasks.splice(index,1);
+        }
+      }else{
+        for(var i=0; i<pending_tasks.length; i++){
+          if(pending_tasks[i].id == id){
+            index = i;
+          }
+        }
+        if(index > -1){
+          pending_tasks.splice(index,1);
+        }
+      }
+    }//end of function remove_task
+
+    function add_task(task){
+      if(task.completed){
+        completed_tasks.push(task);
+      }else{
+        pending_tasks.push(task);
+      }
+
+      add_task_to_ui(task);      
+      hide_loader();
+    }//end of function add_task
+
+
+
+    /* * * * * * * * * * * * * * * * * *
+    ------------------------------------
+    Utilities Section
+    ------------------------------------
+    * * * * * * * * * * * * * * * * * */
+
+    function show_toast_message(message, success){
+      
+      var html = '<div class="toast" role="alert" aria-live="assertive" aria-atomic="true"><div class="toast-header"><strong class="mr-auto">';
+          //Bootstrap</strong>
+
+      if(success){
+        html+= '<span class="success-box"><i class="fas fa-check"></i></span>Success</strong>'
+      }else{
+        html+='<span class="error-box"><i class="fas fa-times"></i></span>Error</strong>';
+      }
+
+      html+= '<small class="text-muted">just now</small><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+            
+      
+      html+= '<div class="toast-body">'+message+'</div></div>';
+      console.log(html);
+
+      var this_toast = $(html);
+      toasts_holder.append(this_toast);
+      this_toast.toast({delay: 3000}).toast('show');
+          
+    }// end of show_toast_message
+
+    function show_loader(){
+      loader_div.show();
+    }// end of function show_loader
+
+    function hide_loader(force_hide){
+      if(pending_updates.length == 0 || force_hide == true){
+        loader_div.hide();
+      }
+    }// end of function hide_loader
+
+    function remove_item_from_pending(task_id){
+      var index = -1;
+      for(var i=0; i<pending_updates.length; i++){
+        if(pending_updates[i].id == task_id){
+          index = i;
+        }
+      }
+      if(index > -1){
+        pending_updates.splice(index,1);
+      }
+    }// end of function remove_item_from_pending
+
+    load_tasks();
+  })();
+  </script>
+</body>
+</html>

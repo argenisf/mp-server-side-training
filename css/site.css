@@ -1,0 +1,118 @@
+#header{
+      min-height: 10em;
+      position: relative;
+    }
+      #header .col{
+        background-color: #f3f6fb;
+        min-height: 60px;
+        border-radius: 5px;
+      }
+      #header h3{
+        margin-top: 10px;
+        color: #6c757d;
+        font-size: 18px;
+        line-height: 40px;
+      }
+      #header .btn-position{
+        float: right;
+        position: absolute;
+        top: 11px; right: 10px;
+      }
+
+    #pending{
+      margin-top: 40px;
+    }
+      #pending .mainAddDiv{
+        position: relative;
+      }
+        #pending .mainAddDiv button{
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          font-size: .7em;
+          opacity: 0;
+        }
+        #pending .mainAddDiv input:focus + button{
+          opacity: 1;
+        }
+        #pending .mainAddDiv input{
+          margin-bottom: 20px;
+        }
+
+
+
+    .taskList{
+      margin: 40px 0 0;
+    }
+
+      .taskList h3{
+        margin-bottom: 10px;
+      }
+
+      .taskList .listItem{
+        background-color: #f3f6fb;
+        padding: 20px 90px 10px 75px;
+        position: relative;
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+        .taskList p{
+          font-size: 1.2em;
+          color: #858d9f;
+        }
+        .taskList .actionBtn,.taskList .status,.taskList .deleteBtn{
+          position: absolute;
+        }
+          .taskList .actionBtn{
+            top: 17px;
+            left: 15px;
+          }
+          .taskList .deleteBtn{
+            top: 17px;
+            right: 25px;
+            z-index: 100;
+            opacity: 0;
+          }
+          .taskList .deleteBtn:hover{
+            opacity: 1;
+          }
+
+            #pending .taskList .actionBtn button:hover{
+              background-color: #007bff;
+              border-color: #007bff;
+            }
+
+          .taskList .status{
+            top: 20px;
+            right: 15px;
+          }
+
+    .taskList.done .listItem{
+      opacity: .5;
+    }
+      .taskList.done .listItem:hover{
+        opacity: 1;
+      }
+      .taskList.done .actionBtn button:hover{
+        background-color: #6c757d;
+        border-color: #6c757d;
+      }
+
+  .toast{ z-index: 100;  }
+  .success-box,.error-box{
+      display: inline-block;
+      height: 20px;
+      width: 20px;
+      border-radius: 5px;
+      line-height: 20px;
+      color: white;
+      text-align: center;
+      font-size: 12px;
+      margin-right: 10px;
+    }
+    .success-box{
+      background-color: #28a745;
+    }
+    .error-box{
+      background-color: #dc3545;
+    }
