@@ -1,0 +1,197 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>MPTasks</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <script src="js/jquery.js"></script>
+  <script src="js/popper.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/font-awesome-a4d98c0ed1.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/site.css">
+  <style type="text/css">
+    .toast{
+      min-width: 250px;
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container"  aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+  <div id="toastHolder" style="position: absolute; top: 0; right: 0;"></div>
+
+  <div id="Authentication" class="row justify-content-center">
+      <div class="col col-lg-6">
+        
+        <div id="LogInContainer">
+          <h3>Authentication</h3>
+
+          <form id="authForm">
+            <div class="form-group">
+              <label for="emailInput">Type your email address:</label>
+              <input required="required" type="email" class="form-control" id="emailInput" placeholder="example@mixpanel.com">
+              <p>(We'll create an account if one doesn't exist already)</p>
+
+              <div id="loader" class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <div class="ctaBtn">
+                <button id="emailAuthBtn" type="button" class="btn btn-primary">
+                  <i class="fas fa-user-lock"></i> Authenticate and Enter
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div id="AltBox">
+            <hr />
+            <p>or</p>
+            <div class="ctaBtn">
+              <button id="demoAuthBtn" type="button" class="btn btn-primary">
+                Visit the demo project
+              </button>
+            </div>
+          </div>
+        </div><!--  LogInContainer  div -->
+
+      </div><!--  col  div -->
+    </div><!--  row  div -->
+
+
+    
+
+  </div><!--  container  div -->
+  <script type="text/javascript">
+  (function(){
+
+    var toasts_holder = $('#toastHolder');
+    var email_input = $('#emailInput');
+    var email_auth_btn = $('#emailAuthBtn');
+    var demo_auth_btn = $('#demoAuthBtn');
+    var endpoints = {
+      "auth": "api/auth_user.php?"
+    };
+    var loader_div = $('#loader');
+    var active_request = false;
+
+    //add listeners
+
+    const form = document.getElementById('authForm');
+    form.addEventListener('submit', function(event){
+      event.preventDefault();
+      send_authentication_request(false);
+    });
+
+    email_auth_btn.on('click',function(e){
+      send_authentication_request(false);
+    })
+
+    demo_auth_btn.on('click',function(e){
+      send_authentication_request(true);
+    })
+
+
+    /* * * * * * * * * * * * * * * * * *
+    ------------------------------------
+    API Requests Section
+    ------------------------------------
+    * * * * * * * * * * * * * * * * * */
+
+    function send_authentication_request(demo){
+      var email = "";
+      if(active_request){
+        //already active request, let's not proceed
+        return false;
+      }
+
+      if(demo){
+        email = "demo@mixpanel.com";
+      }else{
+        email = email_input.val();
+        if(!email.includes('@mixpanel.com')){
+          show_toast_message('Invalid email: please use a mixpanel.com email');
+          return false;
+        }
+      }
+
+      set_request_state(true);
+      
+      $.post(endpoints.auth,{email: email}, function(data){
+        try{
+          if(data.status){
+            var message = (data.message)?data.message:'';
+            show_toast_message('Success:' + message, true);
+            setTimeout(function(){
+              window.location = 'index.php?';
+            },1500);
+          }else{
+            set_request_state(false);
+            var message = (data.message)?data.message:data.error;
+            show_toast_message('Unable to authenticate:' + message);
+          }
+        }catch(e){
+          console.log(e);
+          set_request_state(false);
+          show_toast_message('Unable to authenticate: unknown error');
+        }
+      }).fail(function(e){
+        console.log(e);
+        set_request_state(false);
+        show_toast_message('Unable to authenticate: error connecting');
+      });
+      
+    }// end of send_authentication_request function
+
+    /* * * * * * * * * * * * * * * * * *
+    ------------------------------------
+    Utilities Section
+    ------------------------------------
+    * * * * * * * * * * * * * * * * * */
+
+    function show_toast_message(message, success){
+      
+      var html = '<div class="toast" role="alert" aria-live="assertive" aria-atomic="true"><div class="toast-header"><strong class="mr-auto">';
+          //Bootstrap</strong>
+
+      if(success){
+        html+= '<span class="success-box"><i class="fas fa-check"></i></span>Success</strong>'
+      }else{
+        html+='<span class="error-box"><i class="fas fa-times"></i></span>Error</strong>';
+      }
+
+      html+= '<small class="text-muted">just now</small><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+            
+      
+      html+= '<div class="toast-body">'+message+'</div></div>';
+
+      var this_toast = $(html);
+      toasts_holder.append(this_toast);
+      this_toast.toast({delay: 3000}).toast('show');
+          
+    }// end of show_toast_message
+
+    function set_request_state(state){
+      
+      active_request = state;
+      
+      if(state){
+        loader_div.show();
+        email_input[0].disabled = true;
+        email_auth_btn[0].disabled = true;
+        demo_auth_btn[0].disabled = true;
+      }else{
+        loader_div.hide();
+        email_input[0].disabled = false;
+        email_auth_btn[0].disabled = false;
+        demo_auth_btn[0].disabled = false;
+      }
+    }// end of function show_loader
+
+    set_request_state(false);
+  })(); 
+  </script>
+</body>
+</html>

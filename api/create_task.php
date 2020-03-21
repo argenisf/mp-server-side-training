@@ -69,5 +69,7 @@ if($mysqli->query($query)){
 	echo json_encode($data);
 	die();
 }else{
-	echo $query;
+	$data["error"] = "Unable to create task";
+	echo json_encode($data);
+	die();
 }

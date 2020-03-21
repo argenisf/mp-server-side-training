@@ -29,7 +29,7 @@ if($result){
 	$data['status'] = true;
 	while($obj = $result->fetch_object()){
         $rows[] = array(
-			"id"  => $obj->id,
+			"id"  => intval($obj->id),
 			"text"  => $obj->text,
 			"completed"  => (($obj->completed)?true:false),
         );
