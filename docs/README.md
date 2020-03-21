@@ -11,3 +11,26 @@ Hybrid Client-Server side implementation testing environment. This project can b
 
   * **Web server:** [http://localhost:8888/](http://localhost:8888/)
   * **phpMyAdmin:** [http://localhost:8888/phpMyAdmin/?lang=en](http://localhost:8888/phpMyAdmin/?lang=en)
+
+**Note:** you also need to have git installed. On current versions of Mac OS, it is included with the Xcode Command Line Tools. To check (or install it), just open your terminal and run `git --version`. If it prints out the version, it is already installed. Otherwise, you will be prompted to install them.
+
+---
+
+#### Download the files
+
+Alright, now that you have your PHP environment, let's download the files you need. Open terminal, and navigate to the root folder of your MAMP webserver. You can do this by typing cd `/Applications/MAMP/htdocs/`.
+
+Now, let's close the repository. Run the following command: `git clone https://github.com/argenisf/mp-server-side-training`. Once it finishes, you will have the project files in your computer. You can also view them in your finder by opening a Finder window, and going to Applications -> MAMP -> htdocs -> mp-server-side-training.
+
+#### Install the Database
+
+Open the phpMyAdmin page ([default link](http://localhost:8888/phpMyAdmin/?lang=en)), click on "new" on the left side panel, and head to the "Import tap" on the top menu. You will be able to select a file to import. Choose the file named "database_backup.sql" which is in your downloaded files in the `server-config` folder.
+
+#### Finish Configuration
+
+In the `server-config` folder, open the `config.php` file, and in the `$rootURL` variable, change the value from "" to your site's URL (the default would be: http://localhost:8888/mp-server-side-training/
+
+#### Done
+
+You're all set up to start using the MP Task Manager Project
+

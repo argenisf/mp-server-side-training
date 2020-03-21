@@ -1,7 +1,6 @@
 <?php
 //Configuration variables
-$mpToken = "sample-token";
-$rootURL = "http://localhost:8888/mp-server-side-training/";
+$rootURL = "";
 
 $user = 'root';
 $password = 'root';
@@ -13,10 +12,8 @@ session_start();
 $mysqli = new mysqli($host, $user, $password, $db);
 
 function isConfigValid(){
-	global $mpToken,$rootURL,$mysqli;
-	if($mpToken == "" || $mpToken == "token"){
-		return false;
-	}
+	global $rootURL,$mysqli;
+	
 	if($rootURL == ""){
 		return false;
 	}
