@@ -32,7 +32,7 @@ if(!isConfigValid()){
 
 $user_id =  mysqli_real_escape_string($mysqli,$_REQUEST['user_id']);
 $task_id =  mysqli_real_escape_string($mysqli,$_REQUEST['task_id']);
-$text =  mysqli_real_escape_string($mysqli,$_REQUEST['text']) || "";
+$text =  ($_REQUEST['text']?mysqli_real_escape_string($mysqli,$_REQUEST['text']):"");
 $completed = ($_REQUEST['completed'] == "true")?1:0;
 
 

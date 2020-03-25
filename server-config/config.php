@@ -1,6 +1,6 @@
 <?php
 //Configuration variables
-$rootURL = "";
+$rootURL = "http://localhost:8888/mp-server-side-training/";
 
 $user = 'root';
 $password = 'root';
