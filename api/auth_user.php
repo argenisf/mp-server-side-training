@@ -10,8 +10,15 @@ if(!(isset($_REQUEST['email']))){
 	die();
 }
 
+if(!(isset($_REQUEST['mp_distinct_id']))){
+	$data["error"] = "Parameter 'mp_distinct_id' required";
+	echo json_encode($data);
+	die();
+}
+
 include('../server-config/config.php');
 $email =  mysqli_real_escape_string($mysqli,$_REQUEST['email']);
+$mp_distinct_id = mysqli_real_escape_string($mysqli,$_REQUEST['mp_distinct_id']);
 
 if(strpos($email,"@mixpanel.com") === false){
 	$data["error"] = "Auth requires a mixpanel.com address";
@@ -44,19 +51,28 @@ if($email == "demo@mixpanel.com"){
 }
 
 //check if the user already exists
+$datetime = new DateTime();
+$date_str = substr(date("c"),0,19);
+
 $query = "SELECT * FROM users WHERE email = \"$email\" LIMIT 1";
 $result = $mysqli->query($query);
 if($result && $result-> num_rows == 1){
 	//user exists, let's log the user in
 	$user = $result->fetch_object();
+
+	//mp tracking
+	$mp->identify($user->email); // this only sets ID
+	$mp->track("Login");
+	$mp->people->set($user->email, array(
+	    '$email'       => $user->email,
+	    'Last Login Date' => $date_str
+	));
 	
 	$_SESSION['user_id'] = $user->id;
 	$_SESSION['email'] = $user->email;
 	$_SESSION['user_obj'] = json_encode(["id"=> $user->id, "email"=>$user->email]);
 
 	//update last login
-	$datetime = new DateTime();
-	$date_str = substr(date("c"),0,19);
 	$user_id = $user->id;
 	$update_query =  "UPDATE users SET tasks.completed_date = \"$date_str\" WHERE users.id  = $user_id";
 	$mysqli->query($update_query);
@@ -75,6 +91,20 @@ if($result && $result-> num_rows == 1){
 }else{
 	$query = "INSERT INTO users (email) VALUES (\"$email\");";
 	if($mysqli->query($query)){
+
+		//mp tracking
+		$mp->identify($mp_distinct_id); // this only sets ID
+		$mp->track("Signup");
+		$mp->createAlias($mp_distinct_id, $email);
+		$mp->people->set($mp_distinct_id, array(
+		    '$email'       => $email,
+		    'Last Login Date' => $date_str
+		));
+		$mp->people->setOnce($mp_distinct_id, array(
+		    '$created'       => $date_str
+		));
+
+
 		//insert_id
 		$user_id = $mysqli->insert_id;
 		$data['status'] = true;

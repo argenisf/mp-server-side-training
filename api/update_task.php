@@ -51,6 +51,10 @@ $user = $result->fetch_object();
 if($user->email == "demo@mixpanel.com"){
 	//demo user, let's fake updating the db
 
+	$mp_distinct_id =  mysqli_real_escape_string($mysqli,$_REQUEST['mp_distinct_id']);
+	$mp->identify($mp_distinct_id);
+	$mp->track("Task Updated",array("demo"=>false));
+
 	$data['message'] = 'Update successful. Not permanent  for demo';
 	$data['status'] = true;
 	$data['task'] =  array(
@@ -68,6 +72,10 @@ $query = "SELECT tasks.*, users.email FROM tasks INNER JOIN users ON users.id = 
 $result = $mysqli->query($query);
 
 if($result && $result-> num_rows == 1){
+	$mp->identify($user->email); 
+	$mp->track("Task Updated",array("demo"=>false));
+
+
 	$row = $result->fetch_object();
 	
 	if($row->completed == $completed){

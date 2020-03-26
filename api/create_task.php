@@ -38,9 +38,18 @@ if(!$result || $result-> num_rows == 0){
 	die();
 }
 
+
+
 //check if it is demo user
 $user = $result->fetch_object();
+
+$mp_distinct_id =  mysqli_real_escape_string($mysqli,$_REQUEST['mp_distinct_id']);
+$mp->identify($mp_distinct_id);
+$demo = ($user->email == "demo@mixpanel.com"?true:false);
+$mp->track("Task Created",array("demo"=>$demo));
+
 if($user->email == "demo@mixpanel.com"){
+
 	//demo user, let's fake creating a task
 	$date = new DateTime();
 	$task_id = $date->getTimestamp();
