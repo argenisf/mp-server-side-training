@@ -150,9 +150,9 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn.mxpnl.com/libs/mix
       $.post(endpoints.auth,payload, function(data){
         try{
           if(data.status){
-            if(email !== "demo@mixpanel.com"){
-              mixpanel.identify(email);
-            }
+            //identify with the ID from the server
+            mixpanel.identify(data.user.mp_distinct_id);
+            mixpanel.register({"$created": data.user.created});
 
             var message = (data.message)?data.message:'';
             show_toast_message('Success:' + message, true);

@@ -82,7 +82,9 @@ if($result && $result-> num_rows == 1){
 
 	$user = array(
 		"id" => $user->id,
-		"email" => $user->email
+		"email" => $user->email,
+		"mp_distinct_id"=>$user->email,
+		"created"=>$user->created
 	);
 	$data["user"] = $user;
 
@@ -115,7 +117,9 @@ if($result && $result-> num_rows == 1){
 
 		$user = array(
 			"id"=> $user_id, 
-			"email"=>$email
+			"email"=>$email,
+			"created"=>$date_str,
+			"mp_distinct_id"=>$mp_distinct_id
 		);
 		$data["user"] = $user;
 

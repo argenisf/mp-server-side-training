@@ -25,6 +25,7 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn.mxpnl.com/libs/mix
 
   mixpanel.init(mp_token, {loaded:function(mixpanel){
     mp_distinct_id = mixpanel.get_distinct_id();
+    mixpanel.identify();
 
     //track page load
     const page_description = "Home Screen";
