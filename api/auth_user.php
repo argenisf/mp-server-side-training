@@ -25,6 +25,13 @@ if(!isConfigValid()){
 	die();
 }
 
+if(!(isset($_REQUEST['mp_distinct_id']))){
+	$data["error"] = "Parameter 'mp_distinct_id' required";
+	echo json_encode($data);
+	die();
+}
+$mp_distinct_id = mysqli_real_escape_string($mysqli,$_REQUEST['mp_distinct_id']);
+
 if($email == "demo@mixpanel.com"){
 	$_SESSION['user_id'] = 1;
 	$_SESSION['email'] = "demo@mixpanel.com";
@@ -66,9 +73,11 @@ if($result && $result-> num_rows == 1){
 
 	$user = array(
 		"id" => $user->id,
-		"email" => $user->email
+		"email" => $user->email,
+		"mp_distinct_id" => $user->email
 	);
 	$data["user"] = $user;
+
 
 	echo json_encode($data);
 	die();
@@ -85,11 +94,18 @@ if($result && $result-> num_rows == 1){
 
 		$user = array(
 			"id"=> $user_id, 
-			"email"=>$email
+			"email"=>$email,
+			"mp_distinct_id"=>$mp_distinct_id
 		);
 		$data["user"] = $user;
 
+		$mp->identify($mp_distinct_id); // this only sets ID
+		$mp->track("Signup");
+		$mp->createAlias($mp_distinct_id, $email);
+		$mp->flush();
+
 		echo json_encode($data);
+		die();
 	}else{
 		$data["error"] = "Unable to create user, try again";
 		echo json_encode($data);

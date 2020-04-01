@@ -24,6 +24,14 @@ if(!isConfigValid()){
 }
 // ----- check for required parameters -----
 
+if(!(isset($_REQUEST['mp_distinct_id']))){
+	$data["error"] = "Invalid mp_distinct_id parameter";
+	echo json_encode($data);
+	die();
+}
+$mp_distinct_id =  mysqli_real_escape_string($mysqli,$_REQUEST['mp_distinct_id']);
+$mp->identify($mp_distinct_id);
+
 $user_id =  mysqli_real_escape_string($mysqli,$_REQUEST['user_id']);
 $text =  mysqli_real_escape_string($mysqli,$_REQUEST['text']);
 $completed = 0;
@@ -52,6 +60,10 @@ if($user->email == "demo@mixpanel.com"){
 		'text' => $text,
 		'completed'=> false
 	);
+
+	
+	$mp->track("Task Created",array("demo"=>true));
+
 	echo json_encode($data);
 	die();
 }
@@ -66,6 +78,9 @@ if($mysqli->query($query)){
 		'text' => $text,
 		'completed'=> false
 	);
+
+	$mp->track("Task Created",array("demo"=>false));
+
 	echo json_encode($data);
 	die();
 }else{

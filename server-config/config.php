@@ -23,3 +23,11 @@ function isConfigValid(){
 	
 	return true;
 }
+
+$mp_lib = 'lib/Mixpanel.php';
+if(strpos($_SERVER["REQUEST_URI"], "api/")!== false){
+	$mp_lib = '../' . $mp_lib;
+}
+require $mp_lib;
+$mp_token = "f8bd7cddaf94642530004c3d0509691f";
+$mp = Mixpanel::getInstance($mp_token);
