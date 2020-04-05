@@ -18,9 +18,9 @@ Hybrid Client-Server side implementation testing environment. This project can b
 
 #### Download the files
 
-Alright, now that you have your PHP environment, let's download the files you need. Open terminal, and navigate to the root folder of your MAMP webserver. You can do this by typing cd `/Applications/MAMP/htdocs/`.
+Alright, now that you have your PHP environment, let's download the files you need. Open terminal, and navigate to the root folder of your MAMP webserver. You can do this by typing `cd /Applications/MAMP/htdocs/`.
 
-Now, let's close the repository. Run the following command: `git clone https://github.com/argenisf/mp-server-side-training`. Once it finishes, you will have the project files in your computer. You can also view them in your finder by opening a Finder window, and going to Applications -> MAMP -> htdocs -> mp-server-side-training.
+Now, let's clone the repository. Run the following command: `git clone https://github.com/argenisf/mp-server-side-training`. Once it finishes, you will have the project files in your computer. You can also view them in your finder by opening a Finder window, and going to Applications -> MAMP -> htdocs -> mp-server-side-training.
 
 #### Install the Database
 

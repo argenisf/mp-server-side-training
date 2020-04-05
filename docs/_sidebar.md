@@ -7,4 +7,8 @@
     - [Create a Task](api?id=create-a-task)
     - [Update a Task](api?id=update-a-task)
     - [Delete a Task](api?id=delete-a-task)
+  - [Android](android?id=android-app)
+    - [Download the App](android?id=download-the-app)
+    - [Mixpanel Implementation](android?id=using-the-version-of-the-app-with-mixpanel-on-it)
+    - [Get the Latest](android?id=getting-the-latest-version-of-the-app-from-remote)
     
